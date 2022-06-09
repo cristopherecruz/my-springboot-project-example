@@ -10,6 +10,8 @@ import br.dev.cristopher.forum.repositories.TopicoRepository;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -33,6 +35,7 @@ public class TopicoController {
     CursoRepository cursoRepository;
 
     @GetMapping
+    @Cacheable(value = "listaDeTopicos")
     public Page<TopicoDto> listarTopicos(@RequestParam(required = false) String nomeCurso, @PageableDefault(sort = "id", direction = Sort.Direction.ASC, page = 0, size = 10) Pageable paginacao) {
 
         if (nomeCurso == null) {
@@ -48,6 +51,7 @@ public class TopicoController {
 
     @Transactional
     @PostMapping
+    @CacheEvict(value = "listaDeTopicos")
     public ResponseEntity<TopicoDto> cadastrar(@RequestBody @Valid TopicoForm topicoForm, UriComponentsBuilder uriBuilder) {
 
         Topico novoTopico = topicoForm.converter(cursoRepository);
@@ -76,6 +80,7 @@ public class TopicoController {
 
     @Transactional
     @PutMapping("/{id}")
+    @CacheEvict(value = "listaDeTopicos")
     public ResponseEntity<TopicoDto> atualizar(@PathVariable Long id, @RequestBody @Valid AtualizarTopicoForm topicoForm) {
 
         Optional<Topico> topico = topicoRepository.findById(id);
@@ -91,6 +96,7 @@ public class TopicoController {
 
     @Transactional
     @DeleteMapping("/{id}")
+    @CacheEvict(value = "listaDeTopicos")
     public ResponseEntity<?> deletar(@PathVariable Long id) {
 
         Optional<Topico> topico = topicoRepository.findById(id);
